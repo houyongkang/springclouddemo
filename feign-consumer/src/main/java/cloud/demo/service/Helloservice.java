@@ -7,18 +7,20 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * @Description:
+ * @Description: fallback:服务触发hystrix降级后调用HelloServiceImpl中的方法
  * @Author: Yongkang Hou
  * @Date: 2019-07-30
  */
-
-//fallback:服务触发hystrix降级后调用HelloServiceImpl中的方法
 @FeignClient(value = "EUREKA-PROVIDE",fallback = HelloServiceImpl.class)//名称不区分大小写
 public interface Helloservice {
     @RequestMapping("/hello")
     String hello();
 
-    //定义各参数绑定时RequestParam，RequestHeader等可以指定参数的注解value必须要写。
+    /**
+     * //定义各参数绑定时RequestParam，RequestHeader等可以指定参数的注解value必须要写。
+     * @param name
+     * @return
+     */
     @RequestMapping(value = "/hello1", method = RequestMethod.GET)
     String hello(@RequestParam("name") String name);
 

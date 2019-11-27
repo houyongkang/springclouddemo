@@ -1,17 +1,23 @@
 package springcloud.eureka.provide.eurekaprovide.hellocontroller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.web.bind.annotation.*;
+import springcloud.eureka.provide.eurekaprovide.Utils.FilePortUtil;
+import springcloud.eureka.provide.eurekaprovide.entity.CinemaExport;
+import springcloud.eureka.provide.eurekaprovide.entity.CinemaInfo;
 import springcloud.eureka.provide.eurekaprovide.entity.User;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @Description:
@@ -81,6 +87,55 @@ public class Hellcontroller {
         Long endtime = System.currentTimeMillis ();
         System.out.println ("请求时间：" + (endtime - starttime));
         return "hello,provider";
+    }
+
+    /**
+     * 导出
+     *
+     * @param httpServletResponse
+     * @param
+     */
+    @RequestMapping(value = "/export/{param}", method = RequestMethod.GET)
+    @ResponseBody
+    public void export(HttpServletResponse httpServletResponse, @PathVariable String param) {
+        try {
+            CinemaInfo cinemaInfo = JSONObject.parseObject (param, CinemaInfo.class);
+            System.out.println (JSONObject.parseObject (param, CinemaInfo.class));
+            if (null == cinemaInfo) {
+                cinemaInfo = new CinemaInfo ();
+            }
+            List <CinemaInfo> list = cinemaInfos ();
+            list.sort (Comparator.comparing (CinemaInfo::getCode));
+            SimpleDateFormat dateFormat = new SimpleDateFormat ("yyyyMMddHHmmss");
+            String date = dateFormat.format (new Date ());
+            String titleName = "影院" + date;
+            String[] titles = {"广电编码", "影院名称", "影院级别", "卖品级别", "卡包级别"};
+            List <String> containBeans = new ArrayList <> ();
+            for (Field declaredField : CinemaExport.class.getDeclaredFields ()) {
+                containBeans.add (declaredField.getName ());
+            }
+            FilePortUtil.exportExcel (httpServletResponse, titleName, "影院", titles, list, containBeans);
+
+        } catch (Exception e) {
+        System.out.println (e);
+        }
+    }
+
+    public List <CinemaInfo> cinemaInfos(){
+        List<CinemaInfo> cinemaInfos=new ArrayList <> ();
+        CinemaInfo cinemaInfo=new CinemaInfo ();
+        cinemaInfo.setInnerName ("a");
+        cinemaInfo.setCode ("a");
+        cinemaInfos.add (cinemaInfo);
+        CinemaInfo cinemaInfo2=new CinemaInfo ();
+        cinemaInfo2.setInnerName ("a");
+        cinemaInfo2.setCode ("b");
+        cinemaInfos.add (cinemaInfo2);
+        CinemaInfo cinemaInfo3=new CinemaInfo ();
+        cinemaInfo3.setInnerName ("a");
+        cinemaInfo3.setCode ("c");
+        cinemaInfos.add (cinemaInfo3);
+        return cinemaInfos;
     }
 
 }
